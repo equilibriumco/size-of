@@ -295,15 +295,16 @@ impl_tuple! {
 }
 
 // Implement SizeOf for different calling conventions for functions with up to
-// 16 arguments
+// 16 arguments.
+//
+// EQUILIBRIUM FORK PATCH: upstream 0.1.5 lists target-specific ABIs
+// (aapcs/cdecl/win64/sysv64/stdcall/fastcall) unconditionally. rustc >= 1.95
+// rejects `extern "aapcs" fn` etc. on targets where they are invalid (e.g.
+// aarch64-apple-darwin) with a hard error (E0570). Keep only the ABIs valid on
+// every target; the dropped ones are never instantiated by our consumer. See
+// the README for the full rationale.
 impl_function_ptrs! {
     "C",
     "Rust",
-    "aapcs",
-    "cdecl",
-    "win64",
-    "sysv64",
     "system",
-    "stdcall",
-    "fastcall",
 }

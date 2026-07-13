@@ -1,3 +1,27 @@
+# ⚠️ IMPORTANT — this is a patched fork, not upstream
+
+**What this is:** a fork of [`Kixiron/size-of`](https://github.com/Kixiron/size-of) `0.1.5`, used
+only as a Cargo `[patch]` by the Midnight support in
+[`equilibriumco/hyperlane-monorepo`](https://github.com/equilibriumco/hyperlane-monorepo). We
+never call `size-of` ourselves — it arrives transitively through the Starknet chain tooling
+(`hyperlane-starknet -> cainome -> starknet-types-core -> size-of`).
+
+**The change (one macro, in `src/core_impls.rs`):** the `impl_function_ptrs!` list drops the 6
+target-specific calling-convention ABIs (`aapcs`, `cdecl`, `win64`, `sysv64`, `stdcall`,
+`fastcall`), keeping only the universal `"C"`, `"Rust"`, `"system"`.
+
+**Why:** upstream declares those ABIs for *every* target. Old rustc ignored an unsupported ABI;
+**rustc >= 1.95 turns it into a hard error (E0570)** (e.g. `aapcs` on aarch64-apple-darwin). Our
+Midnight build is pinned to rustc >= 1.95 (the ledger-9.1 crates pull `sysinfo 0.39`, which
+requires it), and `0.1.5` is the last release under the `size-of` name (development continued as
+the renamed `feldera-size-of`), so it can't simply be bumped. The dropped impls are never
+instantiated by our only consumer, so removing them is functionally a no-op.
+
+**Delete this fork** once upstream gates its ABI list by target, or once the dependency stops
+reaching us.
+
+---
+
 ![Crates.io](https://img.shields.io/crates/v/size-of)
 ![docs.rs](https://img.shields.io/docsrs/size-of)
 
